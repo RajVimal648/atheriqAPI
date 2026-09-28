@@ -48,11 +48,11 @@ public class BrevoEmailService : IEmailService
         }
 
         // Load HTML templates
-        var adminHtml  = await LoadTemplateAsync("EmailReceived.html", ct);
+        var adminHtml = await LoadTemplateAsync("EmailReceived.html", ct);
         var clientHtml = await LoadTemplateAsync("EmailSentClient.html", ct);
 
         // Replace placeholders
-        var adminBody  = BuildEmailBody(adminHtml,  lead);
+        var adminBody = BuildEmailBody(adminHtml, lead);
         var clientBody = BuildEmailBody(clientHtml, lead);
 
         using var http = _httpClientFactory.CreateClient("brevo");
@@ -61,20 +61,20 @@ public class BrevoEmailService : IEmailService
         _logger.LogInformation("Sending admin notification to {To} via Brevo.", _settings.ToAddress);
         await SendBrevoEmailAsync(
             http,
-            to:      _settings.ToAddress,
+            to: _settings.ToAddress,
             subject: $"New website lead: {EmailHelper.Clean(lead.FullName, 80)}",
-            html:    adminBody,
+            html: adminBody,
             replyTo: lead.Email,
-            ct:      ct);
+            ct: ct);
 
         // Send client confirmation
         _logger.LogInformation("Sending client confirmation to {To} via Brevo.", lead.Email);
         await SendBrevoEmailAsync(
             http,
-            to:      lead.Email,
+            to: lead.Email,
             subject: "Thank you for contacting Atheriq",
-            html:    clientBody,
-            ct:      ct);
+            html: clientBody,
+            ct: ct);
 
         _logger.LogInformation("Both emails sent successfully via Brevo.");
     }
@@ -96,7 +96,7 @@ public class BrevoEmailService : IEmailService
             htmlContent = html
         };
 
-        var json    = JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull });
+        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull });
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         http.DefaultRequestHeaders.Clear();
@@ -131,11 +131,11 @@ public class BrevoEmailService : IEmailService
 
     private static string BuildEmailBody(string template, LeadNotification lead) =>
         template
-            .Replace("{{name}}",    lead.FullName ?? "-")
-            .Replace("{{email}}",   lead.Email    ?? "-")
-            .Replace("{{phone}}",   lead.Phone    ?? "-")
-            .Replace("{{company}}", lead.Company  ?? "-")
-            .Replace("{{service}}", lead.Service  ?? "-")
-            .Replace("{{message}}", lead.Message  ?? "-")
-            .Replace("{{time}}",    $"{DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
+            .Replace("{{name}}", lead.FullName ?? "-")
+            .Replace("{{email}}", lead.Email ?? "-")
+            .Replace("{{phone}}", lead.Phone ?? "-")
+            .Replace("{{company}}", lead.Company ?? "-")
+            .Replace("{{service}}", lead.Service ?? "-")
+            .Replace("{{message}}", lead.Message ?? "-")
+            .Replace("{{time}}", $"{DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
 }
