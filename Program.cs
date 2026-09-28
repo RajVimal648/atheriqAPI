@@ -1,3 +1,4 @@
+using atheriqAPI.Services.Email;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +23,10 @@ builder.Services.AddCors(options =>
             .WithHeaders("Content-Type");
     });
 });
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -43,7 +47,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
+app.UseHttpsRedirection();
 
 app.UseCors("Website");
 
