@@ -16,10 +16,11 @@ builder.Services.AddCors(options =>
         .WithMethods("POST")
         .WithHeaders("Content-Type")));
 
-// Rate limit: 5 requests per minute per IP (used via [EnableRateLimiting("contact")])
+// Rate limit: 5 requests per minute per IP
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
     options.AddPolicy("contact", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -33,11 +34,8 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseCors("Website");
