@@ -26,7 +26,8 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddHttpClient();                               // needed by BrevoEmailService
+builder.Services.AddScoped<IEmailService, BrevoEmailService>(); // uses Brevo HTTPS API (free, no SMTP port needed)
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
