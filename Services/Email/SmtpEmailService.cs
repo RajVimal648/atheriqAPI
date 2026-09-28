@@ -1,5 +1,6 @@
-﻿using MailKit.Net.Smtp;
+using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
@@ -9,13 +10,16 @@ public class SmtpEmailService : IEmailService
 {
     private readonly EmailSettings _settings;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<SmtpEmailService> _logger;
 
     public SmtpEmailService(
         IOptions<EmailSettings> options,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment,
+        ILogger<SmtpEmailService> logger)
     {
         _settings = options.Value;
         _environment = environment;
+        _logger = logger;
     }
 
     public async Task SendLeadNotificationAsync(
@@ -23,7 +27,10 @@ public class SmtpEmailService : IEmailService
         CancellationToken ct = default)
     {
         if (!_settings.Enabled)
+        {
+            _logger.LogInformation("Email sending is disabled (Enabled=false). Skipping.");
             return;
+        }
 
         // Load both templates
         var adminTemplate = await LoadTemplateAsync(
@@ -56,32 +63,49 @@ public class SmtpEmailService : IEmailService
             subject: "Thank you for contacting Atheriq",
             body: clientBody);
 
+        // Choose SSL mode: UseSsl=true → port 465 (SslOnConnect), false → port 587 (StartTls)
+        var socketOptions = _settings.UseSsl
+            ? SecureSocketOptions.SslOnConnect
+            : SecureSocketOptions.StartTls;
+
+        _logger.LogInformation(
+            "Connecting to SMTP: {Host}:{Port} (UseSsl={UseSsl})",
+            _settings.SmtpHost, _settings.SmtpPort, _settings.UseSsl);
+
         // Send both emails using one SMTP connection
         using var client = new SmtpClient
         {
-            Timeout = 15000
+            Timeout = 30000   // 30 s — shared hosting can be slow
         };
 
         await client.ConnectAsync(
             _settings.SmtpHost,
             _settings.SmtpPort,
-            SecureSocketOptions.StartTls,
+            socketOptions,
             ct);
+
+        _logger.LogInformation("SMTP connected. Authenticating as {Username}.", _settings.Username);
 
         await client.AuthenticateAsync(
             _settings.Username,
             _settings.Password,
             ct);
 
+        _logger.LogInformation("SMTP authenticated. Sending admin notification to {To}.", _settings.ToAddress);
+
         // Send to admin
         await client.SendAsync(
             adminMessage,
             ct);
 
+        _logger.LogInformation("Admin email sent. Sending client confirmation to {To}.", lead.Email);
+
         // Send confirmation to client
         await client.SendAsync(
             clientMessage,
             ct);
+
+        _logger.LogInformation("Client confirmation email sent. Disconnecting.");
 
         await client.DisconnectAsync(
             true,
