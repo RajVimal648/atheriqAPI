@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -13,7 +13,7 @@
 		<PackageReference Include="MimeKit" Version="4.18.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
-		<Content Update="Services\Email\EmailTemplates\EmailReceived.html">
+		<Content Include="Services\Email\EmailTemplates\*.html">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
