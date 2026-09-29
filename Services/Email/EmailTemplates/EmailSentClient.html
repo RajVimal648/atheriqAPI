@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -51,13 +51,13 @@
                         <td style="padding:20px 40px 40px 40px;">
 
                             <p style="margin:0 0 18px 0; font-size:16px; line-height:26px;">
-                                Hi <strong>Raj</strong>,
+                                Hi <strong>{{name}}</strong>,
                             </p>
 
                             <p style="margin:0 0 25px 0; font-size:15px; line-height:25px; color:#4b5563;">
                                 Thank you for getting in touch with <strong>Atheriq</strong>.
                                 We've successfully received your enquiry regarding
-                                <strong>Web Development</strong>. Our team will review your
+                                <strong>{{service}}</strong>. Our team will review your
                                 requirements and get back to you shortly with the relevant
                                 information and next steps.
                             </p>
@@ -80,7 +80,7 @@
                                                     Name
                                                 </td>
                                                 <td style="padding:7px 0; font-size:14px; color:#18263D; font-weight:600;">
-                                                    Raj Sharma
+                                                    {{name}}
                                                 </td>
                                             </tr>
 
@@ -89,9 +89,9 @@
                                                     Email
                                                 </td>
                                                 <td style="padding:7px 0; font-size:14px;">
-                                                    <a href="mailto:raj.sharma@gmail.com"
+                                                    <a href="mailto:{{email}}"
                                                        style="color:#1658C7; text-decoration:none;">
-                                                        raj.sharma@gmail.com
+                                                        {{email}}
                                                     </a>
                                                 </td>
                                             </tr>
@@ -101,7 +101,7 @@
                                                     Phone
                                                 </td>
                                                 <td style="padding:7px 0; font-size:14px; color:#18263D;">
-                                                    +91 9876543210
+                                                    {{phone}}
                                                 </td>
                                             </tr>
 
@@ -110,7 +110,7 @@
                                                     Company
                                                 </td>
                                                 <td style="padding:7px 0; font-size:14px; color:#18263D;">
-                                                    TechNova Solutions
+                                                    {{company}}
                                                 </td>
                                             </tr>
 
@@ -119,7 +119,7 @@
                                                     Service
                                                 </td>
                                                 <td style="padding:7px 0; font-size:14px; color:#18263D; font-weight:600;">
-                                                    Web Development
+                                                    {{service}}
                                                 </td>
                                             </tr>
 
@@ -140,9 +140,7 @@
                                         </p>
 
                                         <p style="margin:0; font-size:14px; line-height:24px; color:#6b7280;">
-                                            Hello, I am interested in developing a professional
-                                            website for our company. Please share the available
-                                            services, estimated timeline, and pricing.
+                                            {{message}}
                                         </p>
 
                                     </td>
@@ -190,9 +188,9 @@
 
                                         <a href="https://atheriq.in"
                                            style="display:inline-block; padding:14px 28px;
-                              font-size:14px; font-weight:700;
-                              color:#ffffff; text-decoration:none;
-                              border-radius:7px;">
+                               font-size:14px; font-weight:700;
+                               color:#ffffff; text-decoration:none;
+                               border-radius:7px;">
                                             Visit Our Website
                                         </a>
 
