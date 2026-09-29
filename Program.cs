@@ -1,15 +1,33 @@
 using atheriqAPI.Services.Email;
+using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load secrets from appsettings.Local.json (gitignored — safe for API keys)
-builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
+// Load secrets from appsettings.Local.json
+builder.Configuration.AddJsonFile(
+    "appsettings.Local.json",
+    optional: true,
+    reloadOnChange: false
+);
 
-builder.Services.AddControllers(); 
+// Controllers
+builder.Services.AddControllers();
+
+// Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "atheriqAPI",
+        Version = "v1",
+        Description = "atheriq API"
+    });
+});
+
+// CORS
 var allowedOrigins =
     builder.Configuration
         .GetSection("Cors:AllowedOrigins")
@@ -26,11 +44,16 @@ builder.Services.AddCors(options =>
             .WithHeaders("Content-Type");
     });
 });
-builder.Services.Configure<EmailSettings>(
-    builder.Configuration.GetSection("EmailSettings"));
 
-builder.Services.AddHttpClient();                               // needed by BrevoEmailService
-builder.Services.AddScoped<IEmailService, BrevoEmailService>(); // uses Brevo HTTPS API (free, no SMTP port needed)
+// Email configuration
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings")
+);
+
+// Email service (SMTP via MailKit)
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
+// Rate limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -43,24 +66,39 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 5,
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
-            }));
+            }
+        )
+    );
 });
 
 var app = builder.Build();
 
+// Swagger
 app.UseSwagger();
-app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "atheriqAPI v1"
+    );
 
+    options.RoutePrefix = "swagger";
+});
+
+// CORS
 app.UseCors("Website");
 
+// Rate limiting
 app.UseRateLimiter();
 
+// Authorization
 app.UseAuthorization();
 
+// Controllers
 app.MapControllers();
 
+// Health/root endpoint
 app.MapGet("/", () => Results.Ok(new
 {
     status = "running",
