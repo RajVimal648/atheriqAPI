@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Load secrets from appsettings.Local.json (gitignored — safe for API keys)
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(); 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
